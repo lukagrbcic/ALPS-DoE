@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.stats import qmc
+import matplotlib.pyplot as plt
 
 
 class DOE:
@@ -37,7 +38,6 @@ class DOE:
       
         return X
                 
-    
     def halton(self):
         
         n = self.n_samples
@@ -50,10 +50,7 @@ class DOE:
         X = qmc.scale(sampler.random(n=n), self.lb, self.ub)
       
         return X
-        
-    
-
-    
+   
     
     def grid(self):
         
@@ -101,13 +98,13 @@ class DOE:
     
     
 
-method = 'grid'   
-n_samples = 1000
-lb = np.array([0.2, 10, 15])
-ub = np.array([1.3, 700, 28])     
+# method = 'lhs'   
+# n_samples = 1000
+# lb = np.array([0.2, 10, 15])
+# ub = np.array([1.3, 700, 28])     
 
-experiment = DOE(n_samples, method, lb, ub)
-print (experiment.generate_samples())
+# experiment = DOE(n_samples, method, lb, ub)
+# print (experiment.generate_samples())
         
         
     
