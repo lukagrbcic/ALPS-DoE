@@ -1,2 +1,2 @@
-# ALPS-DoE
+# AI Laser Parameter Search--Design of Experiments
 Design of experiments framework for generating intial experimental designs of laser manufacturing parameters.
