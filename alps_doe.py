@@ -138,7 +138,7 @@ class DOE:
         
         return selected_samples
 
-    def bc(self, scale=2, maxCand=50):
+    def bc(self, scale=2, maxCand=100):
         """
         Generate N samples in a d-dimensional space that are far from each other
         using the Best Candidate algorithm.
