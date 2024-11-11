@@ -72,7 +72,7 @@ class DOE:
         
         return X
     
-    def greedyfp(self, scale=2):
+    def greedyfp(self, scale=10):
 
         M = self.n_samples * scale  
         
@@ -105,40 +105,8 @@ class DOE:
         
         return selected_samples
 
-    def bc(self, scale=2):
 
-        M = self.n_samples * scale  
-        
-        candidates = np.random.uniform(self.lb, self.ub, size=(M, len(self.lb)))    
-        
-        
-        selected_indices = []
-        available_indices = list(range(M))
-    
-        first_idx = np.random.choice(available_indices)
-        selected_indices.append(first_idx)
-        available_indices.remove(first_idx)
-    
-        for _ in range(self.n_samples - 1):
-            selected_samples = candidates[selected_indices]  
-    
-            remaining_candidates = candidates[available_indices]  
-    
-            distances = cdist(remaining_candidates, selected_samples, metric='euclidean')
-    
-            min_distances = np.min(distances, axis=1)
-    
-            idx_in_remaining = np.argmax(min_distances)
-            idx_max_min_dist = available_indices[idx_in_remaining]
-    
-            selected_indices.append(idx_max_min_dist)
-            available_indices.remove(idx_max_min_dist)
-    
-        selected_samples = candidates[selected_indices]
-        
-        return selected_samples
-
-    def bc(self, scale=2, maxCand=100):
+    def bc(self, scale=10, maxCand=250):
         """
         Generate N samples in a d-dimensional space that are far from each other
         using the Best Candidate algorithm.
@@ -212,13 +180,13 @@ class DOE:
             return self.bc()
     
 
-method = 'BC'   
-n_samples = 1000
-lb = np.array([0.2, 10, 15])
-ub = np.array([1.3, 700, 28])     
+# method = 'BC'   
+# n_samples = 1000
+# lb = np.array([0.2, 10, 15])
+# ub = np.array([1.3, 700, 28])     
 
-experiment = DOE(n_samples, method, lb, ub)
-samples = experiment.generate_samples()
+# experiment = DOE(n_samples, method, lb, ub)
+# samples = experiment.generate_samples()
         
         
     
