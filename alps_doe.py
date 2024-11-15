@@ -162,7 +162,9 @@ class DOE:
         if self.method == 'BC':
             
             return self.bc()
-    
+        #if self.method == 'hybridBC':
+            
+            #return self.hybridBC()
 
 # method = 'BC'   
 # n_samples = 1000
