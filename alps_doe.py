@@ -107,22 +107,6 @@ class DOE:
 
 
     def bc(self, scale=10, maxCand=250):
-        """
-        Generate N samples in a d-dimensional space that are far from each other
-        using the Best Candidate algorithm.
-    
-        Parameters:
-        - N: int, number of samples to generate.
-        - d: int, dimensionality of the space.
-        - scale: int, scale factor used to compute the number of candidates.
-        - maxCand: int, maximum number of candidate samples allowed.
-        - lower_bounds: array-like of shape (d,), lower bounds for each dimension.
-        - upper_bounds: array-like of shape (d,), upper bounds for each dimension.
-    
-        Returns:
-        - selected_samples: numpy array of shape (N, d), the selected samples.
-        """
-
         
         first_sample = np.random.uniform(self.lb, self.ub, size=(1, len(self.lb)))
         selected_samples = [first_sample]  
