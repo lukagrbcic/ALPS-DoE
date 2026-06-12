@@ -7,8 +7,8 @@ def generate_super_shape(
     r, s, cross_w, cross_l, rect_x, rect_w, rect_h, sq_x, sq_s, thickness, gap_width,
     resolution=64
 ):
-    x = np.linspace(-1, 1, resolution)
-    y = np.linspace(-1, 1, resolution)
+    x = np.linspace(-0.5, 0.5, resolution)
+    y = np.linspace(-0.5, 0.5, resolution)
     X, Y = np.meshgrid(x, y)
     
     # Base SDF Primitives with parameterized constants
@@ -62,21 +62,21 @@ raw_samples = sampler.random(n=num_samples)
 
 # 2. Define the geometric scaling bounds (min, max) for the 11 spatial constants
 bounds = [
-    (0.2, 0.9),    # r: circle radius
-    (0.2, 0.9),    # s: square half-size
-    (0.05, 0.4),   # cross_w: cross arm half-width
-    (0.4, 0.95),   # cross_l: cross arm half-length
-    (-0.8, -0.1),  # rect_x: dual rectangle X-center
-    (0.1, 0.4),    # rect_w: dual rectangle half-width
-    (0.2, 0.8),    # rect_h: dual rectangle half-height
-    (0.1, 0.8),    # sq_x: dual square X-center
-    (0.1, 0.4),    # sq_s: dual square half-size
-    (0.05, 0.3),   # thickness: hollowing shell thickness
-    (0.05, 0.4)    # gap_width: split gap half-width
+    (0.1, 0.45),    # r: circle radius
+    (0.1, 0.45),    # s: square half-size
+    (0.025, 0.2),   # cross_w: cross arm half-width
+    (0.2, 0.475),   # cross_l: cross arm half-length
+    (-0.4, -0.05),  # rect_x: dual rectangle X-center
+    (0.05, 0.2),    # rect_w: dual rectangle half-width
+    (0.1, 0.4),     # rect_h: dual rectangle half-height
+    (0.05, 0.4),    # sq_x: dual square X-center
+    (0.05, 0.2),    # sq_s: dual square half-size
+    (0.025, 0.15),  # thickness: hollowing shell thickness
+    (0.025, 0.2)    # gap_width: split gap half-width
 ]
 
 # 3. Generate the dataset
-resolution = 64
+resolution = 256
 dataset = np.zeros((num_samples, resolution, resolution), dtype=int)
 
 for i in range(num_samples):
