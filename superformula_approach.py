@@ -68,7 +68,7 @@ sampler = qmc.LatinHypercube(d=num_parameters, seed=np.random.randint(12,2323232
 sample_params = sampler.random(n=num_samples)
 
 # 2. Generate the dataset
-resolution = 100
+resolution = 256
 dataset = np.zeros((num_samples, resolution, resolution), dtype=int)
 
 for i in range(num_samples):
