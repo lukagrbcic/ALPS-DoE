@@ -6,7 +6,6 @@ Created on Thu Jun 18 09:49:34 2026
 @author: luka
 """
 
-
 import numpy as np
 from scipy.optimize import differential_evolution
 
@@ -214,7 +213,7 @@ target_bitmap = make_two_square_outlines_with_mid_line(resolution)
 
 
 best_params, best_score, fitted = fit_shape(
-    target_bitmap, maxiter=150, popsize=20, seed=0, workers=-1
+    target_bitmap, maxiter=50, popsize=20, seed=0, workers=2
 )
 
 print("Pixel mismatch fraction:", best_score)
