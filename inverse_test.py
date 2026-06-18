@@ -75,16 +75,69 @@ def fit_shape(target, maxiter=200, popsize=20, seed=None, workers=-1, verbose=Tr
 import matplotlib.pyplot as plt
 
 
-from PIL import Image
+# from PIL import Image
 
-img = Image.open("unitCell.jpeg").convert("L")   # load as grayscale
-arr = np.array(img)
-print(arr.min(), arr.max())
-print("fraction white:", (arr == 255).mean())
-bitmap = (arr < 128).astype(int)   # cross = 1
+# img = Image.open("unitCell.jpeg").convert("L")   # load as grayscale
+# arr = np.array(img)
+# print(arr.min(), arr.max())
+# print("fraction white:", (arr == 255).mean())
+# bitmap = (arr < 128).astype(int)   # cross = 1
 
 
-target_bitmap = bitmap  # or load your own bitmap as a (209, 209) int array
+# target_bitmap = bitmap  # or load your own bitmap as a (209, 209) int array
+
+
+# resolution = 209
+
+# def make_circle_bitmap(resolution=209, radius_frac=0.3, cx_frac=0.5, cy_frac=0.5):
+#     """
+#     Returns a (resolution, resolution) int bitmap: 1 inside the circle, 0 outside.
+#     Coordinates are normalized to [0, 1] then scaled, matching origin='lower'.
+#     radius_frac, cx_frac, cy_frac are fractions of the image size.
+#     """
+#     yy, xx = np.mgrid[0:resolution, 0:resolution]
+#     # normalize pixel coords to [0, 1]
+#     x = xx / (resolution - 1)
+#     y = yy / (resolution - 1)
+#     cx, cy = cx_frac, cy_frac
+#     dist = np.sqrt((x - cx)**2 + (y - cy)**2)
+#     bitmap = (dist <= radius_frac).astype(int)
+#     return bitmap
+
+# target_bitmap = make_circle_bitmap(resolution, radius_frac=0.3)
+
+
+
+resolution = 209
+
+def make_square_in_square(resolution=209, outer_half=0.30, inner_half=0.15,
+                          cx_frac=0.5, cy_frac=0.5, filled_inner=False):
+    """
+    Returns a (resolution, resolution) int bitmap.
+    By default: 1 in the region between the outer and inner square (a frame), 0 elsewhere.
+    Set filled_inner=True to also fill the inner square (concentric solid squares look,
+    which on a binary bitmap is just a solid square unless you want a distinct value).
+
+    outer_half, inner_half: half-side lengths as fractions of image size.
+    """
+    yy, xx = np.mgrid[0:resolution, 0:resolution]
+    x = xx / (resolution - 1)
+    y = yy / (resolution - 1)
+    cx, cy = cx_frac, cy_frac
+
+    # Chebyshev (L-inf) distance from center -> square level sets
+    cheb = np.maximum(np.abs(x - cx), np.abs(y - cy))
+
+    outer = cheb <= outer_half
+    inner = cheb <= inner_half
+
+    if filled_inner:
+        bitmap = outer.astype(int)          # solid outer square
+    else:
+        bitmap = (outer & ~inner).astype(int)  # frame: outer minus inner hole
+    return bitmap
+
+target_bitmap = make_square_in_square(resolution, outer_half=0.30, inner_half=0.15)
 
 best_params, best_score, fitted = fit_shape(
     target_bitmap, maxiter=150, popsize=20, seed=0, workers=-1
