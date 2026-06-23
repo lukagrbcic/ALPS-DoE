@@ -5,7 +5,9 @@ from scipy.stats import qmc
 def generate_super_shape(
     w_circle, w_square, w_cross, w_dual, hollow_weight, split_weight, invert_weight,
     r, s, cross_w, cross_l, rect_x, rect_w, rect_h, sq_x, sq_s, thickness, gap_width,
-    layer_weight=0.0, num_layers=3, layer_thickness=0.08,
+# %%
+    layer_weight=0.0, num_layers=2, layer_thickness=0.08,
+
     resolution=64
 ):
     x = np.linspace(-0.5, 0.5, resolution)
@@ -84,7 +86,7 @@ bounds = [
 ]
 
 # 3. Generate the dataset
-resolution = 209
+resolution = 20
 dataset = np.zeros((num_samples, resolution, resolution), dtype=int)
 
 for i in range(num_samples):

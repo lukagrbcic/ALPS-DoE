@@ -76,7 +76,7 @@ bounds = [
 ]
 
 # 3. Generate the dataset
-resolution = 209
+resolution = 20
 dataset = np.zeros((num_samples, resolution, resolution), dtype=int)
 
 for i in range(num_samples):
