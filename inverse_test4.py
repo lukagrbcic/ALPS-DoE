@@ -22,6 +22,7 @@ def generate_super_shape(
     x = np.linspace(-0.5, 0.5, resolution)
     y = np.linspace(-0.5, 0.5, resolution)
     X, Y = np.meshgrid(x, y)
+    
 
     # --- base SDF primitives (signed-ish fields) ---
     d_circle = np.sqrt(X**2 + Y**2) - r
@@ -242,7 +243,7 @@ target_bitmap = make_circle_bitmap(resolution, radius_frac=0.3)
 target_bitmap = make_square_in_square(resolution, outer_half=0.30, inner_half=0.15)
 target_bitmap = make_two_square_outlines_with_mid_line(resolution)
 # target_bitmap = make_octagon_bitmap(resolution, radius_frac=0.30)
-# target_bitmap = make_circle_in_octagon(resolution, oct_radius_frac=0.30, circ_radius_frac=0.15)
+target_bitmap = make_circle_in_octagon(resolution, oct_radius_frac=0.30, circ_radius_frac=0.15)
 
 target_bitmap = bitmap  # or load your own bitmap as a (209, 209) int array
 
