@@ -58,8 +58,8 @@ def gielis_bitmap(
 
     # Inversion, but only within the central frame (so no foreground in margins)
     if int(invert) == 1:
-        mask = frame_mask & (~mask)
-
+        mask = ~mask
+        
     return mask.astype(np.uint8)
 
 
@@ -225,9 +225,9 @@ if __name__ == "__main__":
         N,
         seed=np.random.randint(1_000_000),
         scramble=True,
-        p_invert=0.08,
-        p_vsplit=0.10,
-        p_hsplit=0.10,
+        p_invert=0.5,
+        p_vsplit=0.25,
+        p_hsplit=0.25,
         resolution=RES,
         split_gap=split_gap,
         frame_limit=frame_limit,
