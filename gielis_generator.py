@@ -215,6 +215,11 @@ def plot_random_samples(params, bitmaps, k=12, seed=123, title="Generated"):
 if __name__ == "__main__":
     N = 300
     RES = 100
+    
+    #TODO, filter for empty, generate periodicty data (200 to 300 mu with 10 mu steps)
+    #COmment out code for clarity
+    #Generate a dataset of 1000 samples + separate file for p
+    #reduce the 10% buffer to 5%
 
     # Tune split_gap here if you want a slightly different fixed gap size:
     # e.g. 0.05 (smaller), 0.07 (larger)
