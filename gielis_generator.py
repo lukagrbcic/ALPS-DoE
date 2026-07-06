@@ -22,7 +22,7 @@ def gielis_bitmap(
     invert, vsplit, hsplit,
     resolution=20,
     split_gap=0.06,   # <-- fixed, smaller but not too small
-    frame_limit=0.4, # <-- central 80%: with unit cell walls at +/-0.5, keep +/-0.4
+    frame_limit=0.45, # <-- central 80%: with unit cell walls at +/-0.5, keep +/-0.4
     rmax_angles=2048,
 ):
     # Grid in [-0.5, 0.5]
@@ -213,26 +213,25 @@ def plot_random_samples(params, bitmaps, k=12, seed=123, title="Generated"):
 # Main
 # -----------------------------
 if __name__ == "__main__":
-    N = 300
-    RES = 100
+    N = 1000 #set the size of the dataset
+    RES = 100 #set the resolution per dimension, total pixels will be RESxRES
     
     #TODO, filter for empty, generate periodicty data (200 to 300 mu with 10 mu steps)
-    #COmment out code for clarity
     #Generate a dataset of 1000 samples + separate file for p
     #reduce the 10% buffer to 5%
 
     # Tune split_gap here if you want a slightly different fixed gap size:
     # e.g. 0.05 (smaller), 0.07 (larger)
-    split_gap = 0.06
-    frame_limit = 0.4  # central 80%
+    split_gap = 0.06 #gap in % when we apply the horizontal and/or vertical slices
+    frame_limit = 0.45  # central 90%, 5% buffer on all sides of the unit cell
 
     params, bitmaps = generate_dataset(
         N,
         seed=np.random.randint(1_000_000),
         scramble=True,
-        p_invert=0.5,
-        p_vsplit=0.25,
-        p_hsplit=0.25,
+        p_invert=0.5, #chance of applying inversion
+        p_vsplit=0.25, #chance of vertical splitting
+        p_hsplit=0.25, #chance of horizontal splitting
         resolution=RES,
         split_gap=split_gap,
         frame_limit=frame_limit,
@@ -243,14 +242,9 @@ if __name__ == "__main__":
     print("params:", params.shape, "(9D)")
     print("bitmaps:", bitmaps.shape)
     print("unique bitmap values:", np.unique(bitmaps))
+    
     from PIL import Image
-
-    # for i in bitmaps:
-    #     bitmap_matrix = i*255
-    #     print (bitmap_matrix)
-    #     np.
-    
-    
+        
     for idx, i in enumerate(bitmaps):
         # 1. Scale to 0 and 255, and convert to 8-bit integers
         bitmap_matrix = (i * 255).astype(np.uint8)
