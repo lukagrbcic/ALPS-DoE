@@ -264,13 +264,27 @@ if __name__ == "__main__":
     import os
     os.makedirs("bitmaps", exist_ok=True)
     
+    saved = 0
+    skipped = 0
+    
     for idx, i in enumerate(bitmaps):
-        bitmap_matrix = (i * 255).astype(np.uint8)
-        img = Image.fromarray(bitmap_matrix, mode='L')
+        # i is 0/1 (uint8) from gielis_bitmap
+        if np.all(i == 0) or np.all(i == 1):
+            skipped += 1
+            continue
     
         per = int(periodicity[idx])
+    
+        # Scale to 0..255
+        bitmap_matrix = (i * 255).astype(np.uint8)
+    
+        img = Image.fromarray(bitmap_matrix, mode='L')
         img.save(f"bitmaps/bitmap_{idx}_periodicity_{per}.png")
+    
+        saved += 1
         print(f"Saved bitmap_{idx}_periodicity_{per}.png")
-        
+    
+    print("saved:", saved, "skipped:", skipped)
+            
 
     #plot_random_samples(params, bitmaps, k=12, seed=42, title="Gielis + fixed splits + central frame")
