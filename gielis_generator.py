@@ -214,7 +214,7 @@ def plot_random_samples(params, bitmaps, k=12, seed=123, title="Generated"):
 # -----------------------------
 if __name__ == "__main__":
     N = 300
-    RES = 60
+    RES = 100
 
     # Tune split_gap here if you want a slightly different fixed gap size:
     # e.g. 0.05 (smaller), 0.07 (larger)
@@ -238,5 +238,25 @@ if __name__ == "__main__":
     print("params:", params.shape, "(9D)")
     print("bitmaps:", bitmaps.shape)
     print("unique bitmap values:", np.unique(bitmaps))
+    from PIL import Image
+
+    # for i in bitmaps:
+    #     bitmap_matrix = i*255
+    #     print (bitmap_matrix)
+    #     np.
+    
+    
+    for idx, i in enumerate(bitmaps):
+        # 1. Scale to 0 and 255, and convert to 8-bit integers
+        bitmap_matrix = (i * 255).astype(np.uint8)
+        
+        # 2. Convert the matrix to a grayscale ('L') image
+        img = Image.fromarray(bitmap_matrix, mode='L')
+        
+        # 3. Save with a unique name based on the loop index
+        img.save(f"bitmaps/bitmap_{idx}.png")
+        
+        print(f"Saved bitmap_{idx}.png")
+    
 
     plot_random_samples(params, bitmaps, k=12, seed=42, title="Gielis + fixed splits + central frame")
