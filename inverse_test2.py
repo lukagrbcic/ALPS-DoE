@@ -69,7 +69,7 @@ def generate_super_shape(
 # ----------------------------------------------------------------------
 # Parameter mapping
 # ----------------------------------------------------------------------
-resolution = 209
+resolution = 20
 
 bounds_geom = [
     (0.1, 0.45), (0.1, 0.45), (0.025, 0.2), (0.2, 0.475),
@@ -226,28 +226,30 @@ def make_circle_in_octagon(resolution=209,
 
 from PIL import Image
 
-img = Image.open("unitCell.jpeg").convert("L")   # load as grayscale
+img = Image.open("uc1.png").convert("L")   # load as grayscale
 arr = np.array(img)
+
+print (arr)
+import sys
+sys.exit()
 print(arr.min(), arr.max())
 print("fraction white:", (arr == 255).mean())
 bitmap = (arr < 128).astype(int)   # cross = 1
 
 
-
-
 # ----------------------------------------------------------------------
 # Run  --  pick ONE target
 # ----------------------------------------------------------------------
-#target_bitmap = make_circle_bitmap(resolution, radius_frac=0.3)
-#target_bitmap = make_square_in_square(resolution, outer_half=0.30, inner_half=0.15)
-#target_bitmap = make_two_square_outlines_with_mid_line(resolution)
+target_bitmap = make_circle_bitmap(resolution, radius_frac=0.3)
+target_bitmap = make_square_in_square(resolution, outer_half=0.30, inner_half=0.15)
+target_bitmap = make_two_square_outlines_with_mid_line(resolution)
 #target_bitmap = make_octagon_bitmap(resolution, radius_frac=0.30)
 #target_bitmap = make_circle_in_octagon(resolution, oct_radius_frac=0.30, circ_radius_frac=0.15)
 
-target_bitmap = bitmap  # or load your own bitmap as a (209, 209) int array
+#target_bitmap = bitmap  # or load your own bitmap as a (209, 209) int array
 
 best_params, best_score, fitted = fit_shape(
-    target_bitmap, maxiter=150, popsize=20, seed=0, workers=2
+    target_bitmap, maxiter=5000, popsize=20, seed=0, workers=2
 )
 
 print("Pixel mismatch fraction:", best_score)

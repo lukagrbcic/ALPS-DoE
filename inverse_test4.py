@@ -229,12 +229,17 @@ def make_circle_in_octagon(resolution=209,
 
 from PIL import Image
 
-img = Image.open("uc1.png").convert("L")   # load as grayscale
+img = Image.open("uc6.png").convert("L")   # load as grayscale
 arr = np.array(img)
 print(arr.min(), arr.max())
 print("fraction white:", (arr == 255).mean())
 bitmap = (arr < 128).astype(int)  # cross = 1
 
+
+print (np.shape(bitmap))
+
+# import sys
+# sys.exit()
 
 # ----------------------------------------------------------------------
 # Run  --  pick ONE target
