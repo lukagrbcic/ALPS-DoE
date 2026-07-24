@@ -262,7 +262,7 @@ if __name__ == "__main__":
     
     from PIL import Image
     import os
-    os.makedirs("bitmaps", exist_ok=True)
+    os.makedirs("bitmaps_test", exist_ok=True)
     
     saved = 0
     skipped = 0
@@ -279,7 +279,7 @@ if __name__ == "__main__":
         bitmap_matrix = (i * 255).astype(np.uint8)
     
         img = Image.fromarray(bitmap_matrix, mode='L')
-        img.save(f"bitmaps/bitmap_{idx}_periodicity_{per}.png")
+        img.save(f"bitmaps_test/bitmap_{idx}_periodicity_{per}.png")
     
         saved += 1
         print(f"Saved bitmap_{idx}_periodicity_{per}.png")
@@ -287,4 +287,4 @@ if __name__ == "__main__":
     print("saved:", saved, "skipped:", skipped)
             
 
-    #plot_random_samples(params, bitmaps, k=12, seed=42, title="Gielis + fixed splits + central frame")
+    plot_random_samples(params, bitmaps, k=12, seed=42, title="Gielis + fixed splits + central frame")
