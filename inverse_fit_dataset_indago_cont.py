@@ -85,13 +85,13 @@ def run_pso(loss_fn, lb, ub, iterations=20000, swarm_size=40, seed=None):
     if seed is not None:
         np.random.seed(seed)
 
-    optimizer = FWA()
+    optimizer = DE()
     optimizer.dimensions = len(lb)
     optimizer.lb = np.array(lb, dtype=float)
     optimizer.ub = np.array(ub, dtype=float)
     optimizer.evaluation_function = loss_fn
     optimizer.max_iterations = iterations
-    optimizer.params['n'] = swarm_size
+    optimizer.params['pop_init'] = swarm_size
 
     result = optimizer.optimize()
     return np.array(result.X, dtype=float), float(result.f)
@@ -215,7 +215,7 @@ if __name__ == "__main__":
     FRAME_LIMIT = 0.45
     M_MIN, M_MAX = 1, 12
     ITERATIONS = 2000
-    SWARM_SIZE = 40
+    SWARM_SIZE = 100
     MAX_RETRIES = 3
     N_JOBS = 8
 
@@ -264,7 +264,7 @@ if __name__ == "__main__":
         existing_df["idx"] = existing_df["idx"].astype(int)
         existing_df["pixel_error"] = pd.to_numeric(existing_df["pixel_error"], errors="coerce")
 
-        bad_mask = existing_df["pixel_error"].isna() | (existing_df["pixel_error"] > 0.0)
+        bad_mask = existing_df["pixel_error"].isna() | (existing_df["pixel_error"] > 0.009)
         bad_idxs = existing_df.loc[bad_mask, "idx"].astype(int).tolist()
 
         print(f"Existing CSV rows: {len(existing_df)}")
