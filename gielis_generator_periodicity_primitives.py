@@ -20,7 +20,7 @@ def gielis_r(theta, m, a, b, n1, n2, n3, eps=1e-12):
 def gielis_bitmap(
     m, a, b, n1, n2, n3,
     invert, vsplit, hsplit,
-    shape_mode=0,        # <-- NEW: 0 = none, 1 = circle, 2 = square
+    shape_mode=0,        # 0 = none, 1 = circle, 2 = square
     resolution=20,
     split_gap=0.06,
     frame_limit=0.45,
@@ -31,13 +31,11 @@ def gielis_bitmap(
     y = np.linspace(-0.5, 0.5, resolution, dtype=np.float64)
     X, Y = np.meshgrid(x, y)
 
-    # Frame mask enforces margin from all side walls
     frame_mask = (np.abs(X) <= frame_limit) & (np.abs(Y) <= frame_limit)
 
     rho = np.sqrt(X**2 + Y**2)
     theta = np.arctan2(Y, X)
 
-    # Scale so the curve fits within radius frame_limit (circle fit)
     angles_dense = np.linspace(-np.pi, np.pi, rmax_angles, dtype=np.float64)
     r_dense = gielis_r(angles_dense, m, a, b, n1, n2, n3)
     r_max = float(np.max(r_dense))
@@ -46,35 +44,53 @@ def gielis_bitmap(
     r_theta = gielis_r(theta, m, a, b, n1, n2, n3)
     r_scaled = r_theta * (frame_limit / r_max)
 
-    # Base region (inside polar curve) + frame constraint
-    mask = frame_mask & (rho <= r_scaled)
+    gielis_mask = frame_mask & (rho <= r_scaled)
 
-    # --- NEW: constrain shape into a primitive (circle / square) ---
+    # Build the split "cut" strips once, to be applied only to the inner shape
+    vstrip = np.abs(X) <= split_gap
+    hstrip = np.abs(Y) <= split_gap
+
     shape_mode = int(shape_mode)
-    if shape_mode == 1:
-        # circle inscribed in the frame
-        primitive_mask = rho <= frame_limit
-        mask &= primitive_mask
-    elif shape_mode == 2:
-        # square frame (same footprint as frame_mask, kept explicit)
-        primitive_mask = (np.abs(X) <= frame_limit) & (np.abs(Y) <= frame_limit)
-        mask &= primitive_mask
-    # shape_mode == 0 -> do nothing extra, just the raw gielis shape
 
-    # Vertical split (carve vertical strip around x=0)
-    if int(vsplit) == 1:
-        mask &= ~(np.abs(X) <= split_gap)
+    if shape_mode == 0:
+        # No primitive: the Gielis shape itself IS the inner shape.
+        # Carve the splits directly out of it.
+        inner = gielis_mask
+        if int(vsplit) == 1:
+            inner = inner & (~vstrip)
+        if int(hsplit) == 1:
+            inner = inner & (~hstrip)
 
-    # Horizontal split (carve horizontal strip around y=0)
-    if int(hsplit) == 1:
-        mask &= ~(np.abs(Y) <= split_gap)
+        mask = inner
+        if int(invert) == 1:
+            mask = ~mask
 
-    # Inversion, but only within the central frame (so no foreground in margins)
-    if int(invert) == 1:
-        mask = ~mask
+    else:
+        if shape_mode == 1:
+            primitive_mask = frame_mask & (rho <= frame_limit)   # circle
+        elif shape_mode == 2:
+            primitive_mask = frame_mask.copy()                   # square
+        else:
+            raise ValueError(f"Unknown shape_mode: {shape_mode}")
+
+        # The inner shape is the Gielis "hole" living inside the primitive.
+        # Apply the splits to THIS region only, before computing the ring,
+        # so the primitive's outer boundary is never touched by the split.
+        inner = gielis_mask & primitive_mask
+        if int(vsplit) == 1:
+            inner = inner & (~vstrip)
+        if int(hsplit) == 1:
+            inner = inner & (~hstrip)
+
+        # ring = primitive material minus the (now split-modified) inner hole
+        ring = primitive_mask & (~inner)
+
+        if int(invert) == 0:
+            mask = ring          # background=0, ring=1, interior=0 -> W-B-W
+        else:
+            mask = ~ring         # background=1, ring=0, interior=1 -> B-W-B
 
     return mask.astype(np.uint8)
-
 
 # -----------------------------
 # Params -> bitmap
@@ -127,53 +143,60 @@ def sample_structured_sobol(
     p_invert=0.08,
     p_vsplit=0.10,
     p_hsplit=0.10,
-    p_shape_circle=0.333,   # <-- NEW: chance of circle primitive
-    p_shape_square=0.333,   # <-- NEW: chance of square primitive
+    p_shape_circle=0.30,
+    p_shape_square=0.30,
     m_min=1,
     m_max=12,
     period_min=200,
     period_max=300,
     period_delta=10,
 ):
-    bounds_geom = make_param_bounds(m_min=m_min, m_max=m_max)  # 10D bounds now
-    bounds = bounds_geom + [(period_min, period_max)]         # add 11th dim (periodicity)
-
-    d = len(bounds)  # now 11
+    # --- Sobol ONLY for continuous geometry dims: m, a, b, n1, n2, n3 ---
+    bounds_geom = make_param_bounds(m_min=m_min, m_max=m_max)[:6]  # just the 6 continuous ones
+    d = len(bounds_geom)  # 6
 
     sampler = qmc.Sobol(d=d, scramble=scramble, seed=seed)
-    u = sampler.random(n_samples)  # [0,1]^d
+    u_geom = sampler.random(n_samples)  # [0,1]^6
 
-    lo = np.array([b[0] for b in bounds], dtype=np.float64)
-    hi = np.array([b[1] for b in bounds], dtype=np.float64)
-    params = lo + u * (hi - lo)   # shape (n_samples, 11)
+    lo = np.array([b[0] for b in bounds_geom], dtype=np.float64)
+    hi = np.array([b[1] for b in bounds_geom], dtype=np.float64)
+    geom_vals = lo + u_geom * (hi - lo)   # shape (n_samples, 6)
+    geom_vals[:, 0] = np.clip(np.round(geom_vals[:, 0]), m_min, m_max)  # m
 
-    # --- geometry dims (0..9) ---
-    params[:, 0] = np.clip(np.round(params[:, 0]), m_min, m_max)  # m
+    # --- Independent RNG for all discrete/categorical toggles ---
+    # (decoupled from Sobol so probabilities behave like true independent draws,
+    #  avoiding correlation artifacts between dims)
+    rng = np.random.default_rng(seed if seed is not None else None)
 
-    params[:, 6] = (u[:, 6] < p_invert).astype(np.float64)  # invert
-    params[:, 7] = (u[:, 7] < p_vsplit).astype(np.float64)  # vsplit
-    params[:, 8] = (u[:, 8] < p_hsplit).astype(np.float64)  # hsplit
+    invert = (rng.random(n_samples) < p_invert).astype(np.float64)
+    vsplit = (rng.random(n_samples) < p_vsplit).astype(np.float64)
+    hsplit = (rng.random(n_samples) < p_hsplit).astype(np.float64)
 
-    # --- NEW: shape_mode (0/1/2) from its own uniform draw ---
     p_shape_none = 1.0 - p_shape_circle - p_shape_square
     if p_shape_none < 0:
         raise ValueError("p_shape_circle + p_shape_square must be <= 1.0")
 
-    shape_rand = u[:, 9]
+    shape_rand = rng.random(n_samples)
     shape_mode = np.zeros(n_samples, dtype=np.float64)
     shape_mode[(shape_rand >= p_shape_none) &
                (shape_rand < p_shape_none + p_shape_circle)] = 1.0
     shape_mode[shape_rand >= p_shape_none + p_shape_circle] = 2.0
-    params[:, 9] = shape_mode
 
-    # --- periodicity dim (index 10) : discrete values 200..300 step 10 ---
+    # --- periodicity: discrete values period_min..period_max step period_delta ---
     n_steps = int(round((period_max - period_min) / period_delta))
-    k = np.floor(u[:, 10] * (n_steps + 1)).astype(int)
+    k = rng.integers(0, n_steps + 1, size=n_samples)
     periodicity = (period_min + period_delta * k).astype(int)
     periodicity = np.clip(periodicity, period_min, period_max)
 
-    # return geometry params separately (10D) + periodicity (1D)
-    return params[:, :10], periodicity
+    # --- assemble full 10D geometry param array ---
+    params = np.empty((n_samples, 10), dtype=np.float64)
+    params[:, 0:6] = geom_vals
+    params[:, 6] = invert
+    params[:, 7] = vsplit
+    params[:, 8] = hsplit
+    params[:, 9] = shape_mode
+
+    return params, periodicity
 
 # -----------------------------
 # Dataset generation
